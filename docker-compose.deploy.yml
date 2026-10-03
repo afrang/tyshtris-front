@@ -1,0 +1,10 @@
+services:
+  empire:
+    image: ${EMPIRE_IMAGE:?Set EMPIRE_IMAGE to the published Empire container image}
+    environment:
+      NODE_ENV: production
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+    ports:
+      - "${EMPIRE_PORT:-3000}:3000"
+    restart: unless-stopped
