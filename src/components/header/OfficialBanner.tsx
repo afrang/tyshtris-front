@@ -35,11 +35,11 @@ export function OfficialBanner({
 }: Props) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
-  const pathname = usePathname();
-  // Pathname keeps this in sync after same-tab login/logout navigations.
+  // Re-render after navigations so the auth snapshot refreshes in the same tab.
+  usePathname();
   const signedIn = useSyncExternalStore(
     subscribeAuth,
-    () => (pathname, isAuthenticated()),
+    isAuthenticated,
     () => false,
   );
 
