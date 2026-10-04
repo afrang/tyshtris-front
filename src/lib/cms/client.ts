@@ -30,8 +30,9 @@ export function blogGroupSlugFromMenuItemUrl(url: string): string | null {
 
 async function fetchJson<T>(path: string): Promise<T | null> {
   try {
+    // CMS content must stay fresh after publish/edit — never serve a Data Cache hit.
     const response = await fetch(`${API_URL}${path}`, {
-      next: { revalidate: 30 },
+      cache: "no-store",
     });
     if (!response.ok) {
       console.error(`[cms] ${path} failed: ${response.status}`);

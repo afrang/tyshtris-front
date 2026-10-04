@@ -33,6 +33,21 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Keep document/RSC responses out of CDN/browser caches so CMS edits show up.
+  // Skip hashed build assets and files with extensions (images, fonts, etc.).
+  async headers() {
+    return [
+      {
+        source: "/((?!_next/static|_next/image|.*\\..*).*)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "private, no-cache, no-store, max-age=0, must-revalidate",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default withNextIntl(nextConfig);

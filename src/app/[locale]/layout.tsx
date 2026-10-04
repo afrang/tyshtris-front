@@ -38,6 +38,10 @@ type Props = {
   params: Promise<{ locale: string }>;
 };
 
+/** Always render from live CMS data — avoid Full Route Cache / ISR stale pages. */
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
