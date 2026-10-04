@@ -5,6 +5,8 @@ services:
       NODE_ENV: production
       HOSTNAME: 0.0.0.0
       PORT: 3000
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:?Set NEXT_PUBLIC_API_URL to the public CMS API base URL}
+      NEXT_PUBLIC_PAYPAL_BUSINESS: ${NEXT_PUBLIC_PAYPAL_BUSINESS:-}
     ports:
       - "${EMPIRE_PORT:-3000}:3000"
     restart: unless-stopped
