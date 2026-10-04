@@ -262,6 +262,7 @@ export async function getBlogGroupBySlug(
     keyword: (raw.keyword ?? raw.Keyword ?? null) as string | null,
     description: (raw.description ?? raw.Description ?? null) as string | null,
     parentId: (raw.parentId ?? raw.ParentId ?? null) as string | null,
+    showTimestamp: Boolean(raw.showTimestamp ?? raw.ShowTimestamp ?? true),
     languagePrefix: (raw.languagePrefix ??
       raw.LanguagePrefix ??
       null) as string | null,
@@ -309,6 +310,7 @@ export async function getBlogPostBySlug(
       raw.MetaDescription ??
       null) as string | null,
     commentsEnabled: Boolean(raw.commentsEnabled ?? raw.CommentsEnabled ?? false),
+    showTimestamp: Boolean(raw.showTimestamp ?? raw.ShowTimestamp ?? true),
     createdAt: String(raw.createdAt ?? raw.CreatedAt ?? ""),
     updatedAt: String(raw.updatedAt ?? raw.UpdatedAt ?? ""),
     languagePrefix: (raw.languagePrefix ??

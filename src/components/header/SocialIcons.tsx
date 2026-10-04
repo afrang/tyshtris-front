@@ -50,11 +50,17 @@ function SocialIcon({ platform }: { platform: string }) {
   );
 }
 
-export function SocialIcons({ links }: { links: SocialLink[] }) {
+export function SocialIcons({
+  links,
+  className,
+}: {
+  links: SocialLink[];
+  className?: string;
+}) {
   if (links.length === 0) return null;
 
   return (
-    <ul className="flex items-center gap-0.5">
+    <ul className={["flex items-center gap-0.5", className].filter(Boolean).join(" ")}>
       {links.map((link) => (
         <li key={`${link.platform}-${link.url}`}>
           <a

@@ -18,6 +18,7 @@ type Props = {
   dir?: "ltr" | "rtl";
   readLabel: string;
   emptyImageLabel: string;
+  showTimestamp?: boolean;
 };
 
 export function PostCarousel({
@@ -26,6 +27,7 @@ export function PostCarousel({
   dir = "ltr",
   readLabel,
   emptyImageLabel,
+  showTimestamp = true,
 }: Props) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const dateFormatter = new Intl.DateTimeFormat(locale, {
@@ -58,7 +60,9 @@ export function PostCarousel({
               emptyImageLabel={emptyImageLabel}
               readLabel={readLabel}
               dateLabel={
-                post.createdAt ? dateFormatter.format(new Date(post.createdAt)) : null
+                showTimestamp && post.createdAt
+                  ? dateFormatter.format(new Date(post.createdAt))
+                  : null
               }
             />
           </article>

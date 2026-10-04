@@ -6,6 +6,8 @@ import type { EditorComponent, EditorContainer, EditorTree } from "@/lib/cms/typ
 type Props = {
   tree: EditorTree;
   mediaMap: Record<string, string>;
+  /** Force every container to full width (useful in narrow home columns). */
+  stacked?: boolean;
 };
 
 function asRecord(value: unknown): Record<string, unknown> {
@@ -195,13 +197,16 @@ function ComponentBlock({
 function ContainerBlock({
   container,
   mediaMap,
+  stacked = false,
 }: {
   container: EditorContainer;
   mediaMap: Record<string, string>;
+  stacked?: boolean;
 }) {
   if (!container.publish) return null;
-  const cols =
-    container.cols === 4 || container.cols === 6 || container.cols === 12
+  const cols = stacked
+    ? 12
+    : container.cols === 4 || container.cols === 6 || container.cols === 12
       ? container.cols
       : 12;
 
@@ -225,7 +230,7 @@ function ContainerBlock({
   );
 }
 
-export function EditorContent({ tree, mediaMap }: Props) {
+export function EditorContent({ tree, mediaMap, stacked = false }: Props) {
   if (!tree.publish) return null;
 
   return (
@@ -238,6 +243,7 @@ export function EditorContent({ tree, mediaMap }: Props) {
             key={container.id}
             container={container}
             mediaMap={mediaMap}
+            stacked={stacked}
           />
         ))}
     </div>
@@ -322,7 +328,11 @@ export function PostThumbnailCard({
       </div>
 
       <div className="flex flex-1 flex-col gap-2.5 px-4 pb-4 pt-3.5">
-      
+        {dateLabel ? (
+          <time className="text-xs font-medium tracking-wide text-zinc-500 uppercase">
+            {dateLabel}
+          </time>
+        ) : null}
 
         <h3 className="text-lg font-semibold leading-snug text-balance text-zinc-900 transition duration-300 group-hover:text-[var(--color-royal-purple)] group-focus-visible:text-[var(--color-royal-purple)]">
           {title}

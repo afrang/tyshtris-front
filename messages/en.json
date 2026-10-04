@@ -6,7 +6,8 @@
   "HomePage": {
     "title": "Build with clarity across every language",
     "description": "A Next.js starter with TypeScript, Tailwind CSS, and built-in multilingual routing.",
-    "sliderLabel": "Homepage slider"
+    "sliderLabel": "Homepage slider",
+    "showMore": "Show more"
   },
   "Header": {
     "officialText": "An official website of {name}.",
@@ -72,6 +73,7 @@
     "menu": "Footer",
     "explore": "Explore",
     "contact": "Contact",
+    "follow": "Follow",
     "rights": "© {year} {name}. All rights reserved."
   },
   "A11y": {

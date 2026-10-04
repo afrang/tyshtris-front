@@ -6,7 +6,8 @@
   "HomePage": {
     "title": "ابنِ بوضوح بكل لغة",
     "description": "بداية Next.js مع TypeScript و Tailwind CSS وتوجيه متعدد اللغات مدمج.",
-    "sliderLabel": "شريط الصفحة الرئيسية"
+    "sliderLabel": "شريط الصفحة الرئيسية",
+    "showMore": "المزيد"
   },
   "Header": {
     "officialText": "موقع رسمي لـ {name}.",
@@ -72,6 +73,7 @@
     "menu": "التذييل",
     "explore": "استكشف",
     "contact": "تواصل",
+    "follow": "تابعنا",
     "rights": "© {year} {name}. جميع الحقوق محفوظة."
   },
   "A11y": {

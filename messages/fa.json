@@ -6,7 +6,8 @@
   "HomePage": {
     "title": "با وضوح در هر زبانی بسازید",
     "description": "استارتر Next.js با TypeScript، Tailwind CSS و مسیر‌یابی چندزبانه داخلی.",
-    "sliderLabel": "اسلایدر صفحه اصلی"
+    "sliderLabel": "اسلایدر صفحه اصلی",
+    "showMore": "بیشتر"
   },
   "Header": {
     "officialText": "وب‌سایت رسمی {name}.",
@@ -72,6 +73,7 @@
     "menu": "پاورقی",
     "explore": "بخش‌ها",
     "contact": "تماس",
+    "follow": "ما را دنبال کنید",
     "rights": "© {year} {name}. تمامی حقوق محفوظ است."
   },
   "A11y": {

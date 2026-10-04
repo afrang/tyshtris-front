@@ -122,7 +122,7 @@ export default async function BlogGroupPage({ params }: Props) {
                   emptyImageLabel={t("noPicture")}
                   readLabel={t("readPost")}
                   dateLabel={
-                    post.createdAt
+                    group.showTimestamp && post.createdAt
                       ? dateFormatter.format(new Date(post.createdAt))
                       : null
                   }

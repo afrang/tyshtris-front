@@ -78,9 +78,10 @@ export default async function BlogPostPage({ params }: Props) {
   });
   const primaryGroup = post.groups[0] ?? null;
   const relatedPosts = await getRelatedGroupPosts(post, locale);
-  const dateLabel = post.createdAt
-    ? dateFormatter.format(new Date(post.createdAt))
-    : null;
+  const dateLabel =
+    post.showTimestamp && post.createdAt
+      ? dateFormatter.format(new Date(post.createdAt))
+      : null;
 
   return (
     <main className="flex w-full flex-1 flex-col">
@@ -97,6 +98,11 @@ export default async function BlogPostPage({ params }: Props) {
           <h1 className="max-w-4xl text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
             {post.title}
           </h1>
+          {dateLabel ? (
+            <time className="text-sm font-medium tracking-wide text-white/70">
+              {dateLabel}
+            </time>
+          ) : null}
           {post.description ? (
             <p className="max-w-3xl text-base leading-7 text-white/80 sm:text-lg sm:leading-8">
               {post.description}
@@ -183,7 +189,7 @@ export default async function BlogPostPage({ params }: Props) {
                   emptyImageLabel={t("noPicture")}
                   readLabel={t("readPost")}
                   dateLabel={
-                    related.createdAt
+                    post.showTimestamp && related.createdAt
                       ? dateFormatter.format(new Date(related.createdAt))
                       : null
                   }

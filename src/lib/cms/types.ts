@@ -99,6 +99,7 @@ export type PublicBlogGroupPage = {
   keyword: string | null;
   description: string | null;
   parentId: string | null;
+  showTimestamp: boolean;
   languagePrefix: string | null;
   thumbnailUrl: string | null;
   breadcrumb: BlogGroupBreadcrumbItem[];
@@ -127,6 +128,7 @@ export type PublicBlogPostPage = {
   metaTitle: string | null;
   metaDescription: string | null;
   commentsEnabled: boolean;
+  showTimestamp: boolean;
   createdAt: string;
   updatedAt: string;
   languagePrefix: string | null;
