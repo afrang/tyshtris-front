@@ -15,6 +15,10 @@ import {
   persistSession,
 } from "@/lib/auth/auth";
 import { isRtlLocale } from "@/i18n/routing";
+import {
+  Turnstile,
+  isTurnstileConfigured,
+} from "@/components/captcha/Turnstile";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -35,6 +39,8 @@ export function LoginForm({ locale }: { locale: string }) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [resendCooldownSec, setResendCooldownSec] = useState(0);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaKey, setCaptchaKey] = useState(0);
 
   const otpRefs = useRef<Array<HTMLInputElement | null>>([]);
 
@@ -65,14 +71,24 @@ export function LoginForm({ locale }: { locale: string }) {
       setError(t("signInFailed"));
       return;
     }
+    if (isTurnstileConfigured() && !captchaToken) {
+      setError(t("captchaRequired"));
+      return;
+    }
     try {
       setLoading(true);
-      const res = await apiLogin({ email, password });
+      const res = await apiLogin({
+        email,
+        password,
+        captchaToken: captchaToken ?? undefined,
+      });
       persistSession(res.token, res.user);
       router.push("/account");
     } catch (err) {
       const message = err instanceof Error ? err.message : t("signInFailed");
       setError(message || t("signInFailed"));
+      setCaptchaToken(null);
+      setCaptchaKey((value) => value + 1);
     } finally {
       setLoading(false);
     }
@@ -262,9 +278,15 @@ export function LoginForm({ locale }: { locale: string }) {
               minLength={6}
             />
           </div>
+          <Turnstile
+            key={captchaKey}
+            theme="dark"
+            onToken={setCaptchaToken}
+            className="flex justify-center"
+          />
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || (isTurnstileConfigured() && !captchaToken)}
             className="mt-2 inline-flex w-full h-11 items-center justify-center rounded-xl bg-gradient-to-r from-[#e6c98d] to-[#c9a45c] px-4 text-sm font-bold text-[#1a1208] shadow-[inset_0_1px_0_rgba(255,255,255,0.32),0_7px_18px_-10px_rgba(201,162,39,0.9)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
           >
             {loading ? t("signingIn") : t("signIn")}

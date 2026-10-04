@@ -132,12 +132,16 @@ export default async function BlogPostPage({ params }: Props) {
         </div>
       </header>
 
-      <div className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
-      
-
+      {/* In front of the hero wave; CMS columns stack full-width. */}
+      <div className="relative z-30 -mt-8 w-full flex-1 px-4 pb-8 pt-6 sm:-mt-10 sm:px-6 sm:pt-8 lg:-mt-12 lg:px-8">
+        <div className="mx-auto w-full max-w-7xl">
         {post.content ? (
           <section className="mb-14">
-            <EditorContent tree={post.content} mediaMap={post.mediaMap} />
+            <EditorContent
+              tree={post.content}
+              mediaMap={post.mediaMap}
+              stacked
+            />
           </section>
         ) : (
           <p className="mb-14 text-zinc-600">{t("emptyContent")}</p>
@@ -220,6 +224,7 @@ export default async function BlogPostPage({ params }: Props) {
               ← {t("backHome")}
             </Link>
           )}
+        </div>
         </div>
       </div>
     </main>

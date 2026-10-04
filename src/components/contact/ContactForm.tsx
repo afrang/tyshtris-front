@@ -2,6 +2,10 @@
 
 import { type FormEvent, useState } from "react";
 import { useTranslations } from "next-intl";
+import {
+  Turnstile,
+  isTurnstileConfigured,
+} from "@/components/captcha/Turnstile";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5068";
@@ -24,6 +28,8 @@ export function ContactForm({ locale }: Props) {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaKey, setCaptchaKey] = useState(0);
 
   const nameInvalid = error === t("required") && name.trim().length === 0;
   const emailInvalid =
@@ -56,6 +62,11 @@ export function ContactForm({ locale }: Props) {
       return;
     }
 
+    if (isTurnstileConfigured() && !captchaToken) {
+      setError(t("captchaRequired"));
+      return;
+    }
+
     setSending(true);
     try {
       const response = await fetch(
@@ -71,6 +82,7 @@ export function ContactForm({ locale }: Props) {
               subject: subject.trim(),
               message: message.trim(),
             },
+            captchaToken: captchaToken ?? null,
           }),
         },
       );
@@ -81,13 +93,24 @@ export function ContactForm({ locale }: Props) {
       }
 
       if (!response.ok) {
-        setError(t("failed"));
+        let messageText = t("failed");
+        try {
+          const body = (await response.json()) as { error?: string };
+          if (body.error) messageText = body.error;
+        } catch {
+          // ignore
+        }
+        setError(messageText);
+        setCaptchaToken(null);
+        setCaptchaKey((value) => value + 1);
         return;
       }
 
       setSent(true);
     } catch {
       setError(t("failed"));
+      setCaptchaToken(null);
+      setCaptchaKey((value) => value + 1);
     } finally {
       setSending(false);
     }
@@ -194,6 +217,13 @@ export function ContactForm({ locale }: Props) {
         />
       </label>
 
+      <Turnstile
+        key={captchaKey}
+        theme="light"
+        onToken={setCaptchaToken}
+        className="mt-5 flex justify-center"
+      />
+
       {error ? (
         <p className="mt-4 text-sm text-red-700" role="alert">
           {error}
@@ -202,7 +232,7 @@ export function ContactForm({ locale }: Props) {
 
       <button
         type="submit"
-        disabled={sending}
+        disabled={sending || (isTurnstileConfigured() && !captchaToken)}
         className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[var(--color-gold)] px-5 text-base font-bold text-[var(--color-gold-text)] shadow-[inset_0_1px_0_rgba(255,255,255,0.28)] transition hover:bg-[#d8b33d] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-gold)] disabled:cursor-not-allowed disabled:opacity-55"
       >
         {sending ? t("sending") : t("submit")}

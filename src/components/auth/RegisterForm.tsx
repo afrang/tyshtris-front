@@ -15,6 +15,10 @@ import {
   persistSession,
 } from "@/lib/auth/auth";
 import { isRtlLocale } from "@/i18n/routing";
+import {
+  Turnstile,
+  isTurnstileConfigured,
+} from "@/components/captcha/Turnstile";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -34,6 +38,8 @@ export function RegisterForm({ locale }: { locale: string }) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [resendCooldownSec, setResendCooldownSec] = useState(60);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaKey, setCaptchaKey] = useState(0);
 
   const otpRefs = useRef<Array<HTMLInputElement | null>>([]);
 
@@ -78,9 +84,18 @@ export function RegisterForm({ locale }: { locale: string }) {
       setError(t("signInFailed"));
       return;
     }
+    if (isTurnstileConfigured() && !captchaToken) {
+      setError(t("captchaRequired"));
+      return;
+    }
     try {
       setLoading(true);
-      await apiRegister({ email, password, confirmPassword });
+      await apiRegister({
+        email,
+        password,
+        confirmPassword,
+        captchaToken: captchaToken ?? undefined,
+      });
       setStep("verify");
       setResendCooldownSec(60);
       setOtpDigits(["", "", "", "", "", ""]);
@@ -91,6 +106,8 @@ export function RegisterForm({ locale }: { locale: string }) {
       const message =
         err instanceof Error ? err.message : t("invalidCodeOrEmail");
       setError(message || t("invalidCodeOrEmail"));
+      setCaptchaToken(null);
+      setCaptchaKey((value) => value + 1);
     } finally {
       setLoading(false);
     }
@@ -266,9 +283,15 @@ export function RegisterForm({ locale }: { locale: string }) {
               minLength={6}
             />
           </div>
+          <Turnstile
+            key={captchaKey}
+            theme="dark"
+            onToken={setCaptchaToken}
+            className="flex justify-center"
+          />
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || (isTurnstileConfigured() && !captchaToken)}
             className="mt-2 inline-flex w-full h-11 items-center justify-center rounded-xl bg-gradient-to-r from-[#e6c98d] to-[#c9a45c] px-4 text-sm font-bold text-[#1a1208] shadow-[inset_0_1px_0_rgba(255,255,255,0.32),0_7px_18px_-10px_rgba(201,162,39,0.9)] transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
           >
             {loading ? t("creatingAccount") : t("createAccount")}

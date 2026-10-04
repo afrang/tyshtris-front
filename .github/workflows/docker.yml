@@ -12,6 +12,10 @@ on:
         required: false
         type: string
         default: ""
+      NEXT_PUBLIC_TURNSTILE_SITE_KEY:
+        description: Cloudflare Turnstile site key (public)
+        required: true
+        type: string
 
 concurrency:
   group: docker-${{ github.workflow }}-${{ github.ref }}
@@ -65,3 +69,4 @@ jobs:
           build-args: |
             NEXT_PUBLIC_API_URL=${{ inputs.NEXT_PUBLIC_API_URL }}
             NEXT_PUBLIC_PAYPAL_BUSINESS=${{ inputs.NEXT_PUBLIC_PAYPAL_BUSINESS }}
+            NEXT_PUBLIC_TURNSTILE_SITE_KEY=${{ inputs.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}

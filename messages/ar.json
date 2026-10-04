@@ -67,7 +67,8 @@
     "required": "أكمل الاسم والبريد والموضوع والرسالة.",
     "invalidEmail": "أدخل بريدًا إلكترونيًا صالحًا.",
     "failed": "تعذر إرسال الرسالة. حاول مرة أخرى بعد قليل.",
-    "unavailable": "إرسال الرسائل غير متاح بعد."
+    "unavailable": "إرسال الرسائل غير متاح بعد.",
+    "captchaRequired": "يرجى إكمال التحقق الأمني."
   },
   "Footer": {
     "menu": "التذييل",
@@ -120,7 +121,8 @@
     "commentCancelReply": "إلغاء الرد",
     "commentSuccess": "تم إرسال تعليقك وهو بانتظار موافقة المشرف.",
     "commentsDisabled": "التعليقات مغلقة لهذا المقال.",
-    "commentsLoadError": "تعذر تحميل التعليقات."
+    "commentsLoadError": "تعذر تحميل التعليقات.",
+    "captchaRequired": "يرجى إكمال التحقق الأمني."
   },
   "Account": {
     "title": "حسابك",
@@ -197,6 +199,7 @@
     "registrationSuccess": "تمت التحقق من الحساب!",
     "redirectingToAccount": "جارٍ فتح حسابك…",
     "authHeaderLogin": "تسجيل الدخول",
-    "authHeaderRegister": "إنشاء حساب"
+    "authHeaderRegister": "إنشاء حساب",
+    "captchaRequired": "يرجى إكمال التحقق الأمني."
   }
 }

@@ -96,6 +96,7 @@ export async function createPublicComment(input: {
   authorDisplayName: string;
   authorEmail?: string;
   parentCommentId?: string | null;
+  captchaToken?: string;
 }): Promise<CommentItem> {
   const response = await fetch(
     `${API_URL}/api/public/comments/${encodeURIComponent(input.component)}/${input.parentId}`,
@@ -107,6 +108,7 @@ export async function createPublicComment(input: {
         parentCommentId: input.parentCommentId ?? null,
         authorDisplayName: input.authorDisplayName,
         authorEmail: input.authorEmail || null,
+        captchaToken: input.captchaToken ?? null,
       }),
     },
   );

@@ -67,7 +67,8 @@
     "required": "Fill in your name, email, subject, and message.",
     "invalidEmail": "Enter a valid email address.",
     "failed": "The message could not be sent. Try again in a moment.",
-    "unavailable": "Messages are not open yet."
+    "unavailable": "Messages are not open yet.",
+    "captchaRequired": "Please complete the captcha challenge."
   },
   "Footer": {
     "menu": "Footer",
@@ -120,7 +121,8 @@
     "commentCancelReply": "Cancel reply",
     "commentSuccess": "Your comment was submitted and is waiting for admin approval.",
     "commentsDisabled": "Comments are closed for this post.",
-    "commentsLoadError": "Could not load comments."
+    "commentsLoadError": "Could not load comments.",
+    "captchaRequired": "Please complete the captcha challenge."
   },
   "Account": {
     "title": "Your account",
@@ -197,6 +199,7 @@
     "registrationSuccess": "Account verified!",
     "redirectingToAccount": "Opening your account…",
     "authHeaderLogin": "Log in",
-    "authHeaderRegister": "Register"
+    "authHeaderRegister": "Register",
+    "captchaRequired": "Please complete the captcha challenge."
   }
 }

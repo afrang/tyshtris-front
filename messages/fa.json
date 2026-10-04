@@ -67,7 +67,8 @@
     "required": "نام، ایمیل، موضوع و پیام را کامل کنید.",
     "invalidEmail": "یک ایمیل معتبر وارد کنید.",
     "failed": "پیام ارسال نشد. کمی بعد دوباره تلاش کنید.",
-    "unavailable": "ارسال پیام هنوز فعال نشده است."
+    "unavailable": "ارسال پیام هنوز فعال نشده است.",
+    "captchaRequired": "لطفاً چالش امنیتی را تکمیل کنید."
   },
   "Footer": {
     "menu": "پاورقی",
@@ -120,7 +121,8 @@
     "commentCancelReply": "لغو پاسخ",
     "commentSuccess": "نظر شما ارسال شد و پس از تأیید مدیر نمایش داده می‌شود.",
     "commentsDisabled": "ثبت نظر برای این مطلب غیرفعال است.",
-    "commentsLoadError": "بارگذاری نظرات ممکن نشد."
+    "commentsLoadError": "بارگذاری نظرات ممکن نشد.",
+    "captchaRequired": "لطفاً چالش امنیتی را تکمیل کنید."
   },
   "Account": {
     "title": "حساب شما",
@@ -197,6 +199,7 @@
     "registrationSuccess": "حساب با موفقیت تایید شد!",
     "redirectingToAccount": "در حال باز کردن حساب شما…",
     "authHeaderLogin": "ورود",
-    "authHeaderRegister": "ثبت نام"
+    "authHeaderRegister": "ثبت نام",
+    "captchaRequired": "لطفاً چالش امنیتی را تکمیل کنید."
   }
 }

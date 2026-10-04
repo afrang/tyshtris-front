@@ -13,6 +13,10 @@ import {
   listPublicComments,
   type CommentItem,
 } from "@/lib/cms/comments";
+import {
+  Turnstile,
+  isTurnstileConfigured,
+} from "@/components/captcha/Turnstile";
 
 type Props = {
   postId: string;
@@ -98,6 +102,8 @@ export function PostComments({ postId, commentsEnabled }: Props) {
   const [email, setEmail] = useState("");
   const [body, setBody] = useState("");
   const [replyTo, setReplyTo] = useState<CommentItem | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaKey, setCaptchaKey] = useState(0);
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
@@ -132,6 +138,11 @@ export function PostComments({ postId, commentsEnabled }: Props) {
     setError(null);
     setSuccess(null);
 
+    if (isTurnstileConfigured() && !captchaToken) {
+      setError(t("captchaRequired"));
+      return;
+    }
+
     startTransition(async () => {
       try {
         await createPublicComment({
@@ -141,15 +152,20 @@ export function PostComments({ postId, commentsEnabled }: Props) {
           authorDisplayName: name,
           authorEmail: email || undefined,
           parentCommentId: replyTo?.id ?? null,
+          captchaToken: captchaToken ?? undefined,
         });
         setBody("");
         setReplyTo(null);
+        setCaptchaToken(null);
+        setCaptchaKey((value) => value + 1);
         setSuccess(t("commentSuccess"));
         const list = await listPublicComments("blogpost", postId);
         setComments(list.comments);
         setEnabled(list.commentsEnabled);
       } catch (err) {
         setError(err instanceof Error ? err.message : t("commentsLoadError"));
+        setCaptchaToken(null);
+        setCaptchaKey((value) => value + 1);
       }
     });
   }
@@ -225,6 +241,13 @@ export function PostComments({ postId, commentsEnabled }: Props) {
             />
           </label>
 
+          <Turnstile
+            key={captchaKey}
+            theme="light"
+            onToken={setCaptchaToken}
+            className="flex justify-start"
+          />
+
           {error ? <p className="text-sm text-red-600">{error}</p> : null}
           {success ? (
             <p className="text-sm text-[var(--color-royal-purple)]">{success}</p>
@@ -232,7 +255,7 @@ export function PostComments({ postId, commentsEnabled }: Props) {
 
           <button
             type="submit"
-            disabled={pending}
+            disabled={pending || (isTurnstileConfigured() && !captchaToken)}
             className="inline-flex items-center bg-[var(--color-royal-purple)] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[var(--color-royal-purple-deep)] disabled:opacity-60"
           >
             {pending ? t("commentSubmitting") : t("commentSubmit")}

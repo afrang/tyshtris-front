@@ -109,6 +109,7 @@ export type RegisterBody = {
   email: string;
   password: string;
   confirmPassword: string;
+  captchaToken?: string;
 };
 
 export type VerifyOtpBody = {
