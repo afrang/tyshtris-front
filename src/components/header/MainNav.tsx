@@ -36,7 +36,6 @@ function itemIsActive(item: MenuItemWithMega, pathname: string): boolean {
 }
 
 export function MainNav({
-  locale,
   siteName,
   siteTitle,
   logoUrl,
@@ -144,7 +143,6 @@ export function MainNav({
           <DesktopNavBar
             menu={menu}
             pathname={pathname}
-            locale={locale}
             menuLabel={menuLabel}
             moreLabel={moreLabel}
           />
@@ -199,13 +197,11 @@ function navLinkClass(active: boolean): string {
 function DesktopNavBar({
   menu,
   pathname,
-  locale,
   menuLabel,
   moreLabel,
 }: {
   menu: MenuItemWithMega[];
   pathname: string;
-  locale: string;
   menuLabel: string;
   moreLabel: string;
 }) {
@@ -289,7 +285,6 @@ function DesktopNavBar({
             key={item.id}
             item={item}
             pathname={pathname}
-            locale={locale}
             isLast={overflow.length === 0 && index === visible.length - 1}
           />
         ))}
@@ -393,12 +388,10 @@ function MoreNavMenu({
 function DesktopNavItem({
   item,
   pathname,
-  locale,
   isLast = false,
 }: {
   item: MenuItemWithMega;
   pathname: string;
-  locale: string;
   isLast?: boolean;
 }) {
   const t = useTranslations("Header");

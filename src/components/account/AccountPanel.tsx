@@ -46,8 +46,10 @@ export function AccountPanel({ locale }: { locale: string }) {
   const [body, setBody] = useState("");
   const [reply, setReply] = useState("");
 
-  const [displayName, setDisplayName] = useState("");
-  const [email, setEmail] = useState("");
+  const [displayName, setDisplayName] = useState(
+    () => getUser()?.displayName ?? "",
+  );
+  const [email, setEmail] = useState(() => getUser()?.email ?? "");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
@@ -55,12 +57,6 @@ export function AccountPanel({ locale }: { locale: string }) {
     if (!getToken()) {
       router.replace("/login");
       return;
-    }
-
-    const stored = getUser();
-    if (stored) {
-      setDisplayName(stored.displayName);
-      setEmail(stored.email);
     }
 
     let cancelled = false;
@@ -86,7 +82,7 @@ export function AccountPanel({ locale }: { locale: string }) {
     return () => {
       cancelled = true;
     };
-  }, [router]);
+  }, [router, t]);
 
   function categoryLabel(value: string): string {
     if (value === "news") return t("news");

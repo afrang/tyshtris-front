@@ -6,6 +6,7 @@ import {
   useId,
   useRef,
   useState,
+  useSyncExternalStore,
   type PointerEvent as ReactPointerEvent,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
@@ -21,6 +22,10 @@ type Props = {
   data?: Record<string, unknown> | null;
   options?: Record<string, unknown> | null;
 };
+
+function subscribeNoop() {
+  return () => {};
+}
 
 function GalleryImage({ url }: { url: string }) {
   return (
@@ -45,7 +50,7 @@ function GalleryLightbox({
 }) {
   const t = useTranslations("A11y");
   const dialogRef = useRef<HTMLDivElement>(null);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(subscribeNoop, () => true, () => false);
   const count = urls.length;
   const safeIndex = ((index % count) + count) % count;
 
@@ -55,10 +60,6 @@ function GalleryLightbox({
     },
     [count, onChange, safeIndex],
   );
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -277,9 +278,8 @@ function CarouselGallery({
   const pageCount = Math.max(1, pages.length);
 
   const [page, setPage] = useState(0);
-  const [dragPx, setDragPx] = useState(0);
+  const [dragPercent, setDragPercent] = useState(0);
   const [dragging, setDragging] = useState(false);
-  const viewportRef = useRef<HTMLDivElement>(null);
   const dragStartX = useRef(0);
   const dragStartPage = useRef(0);
   const pointerId = useRef<number | null>(null);
@@ -301,28 +301,26 @@ function CarouselGallery({
     [goTo, safePage],
   );
 
-  useEffect(() => {
-    setPage((current) => Math.min(current, pageCount - 1));
-  }, [pageCount]);
-
   function onPointerDown(event: ReactPointerEvent<HTMLDivElement>) {
     if (pageCount <= 1 || event.button !== 0) return;
     pointerId.current = event.pointerId;
     dragStartX.current = event.clientX;
     dragStartPage.current = safePage;
     setDragging(true);
-    setDragPx(0);
+    setDragPercent(0);
     event.currentTarget.setPointerCapture(event.pointerId);
   }
 
   function onPointerMove(event: ReactPointerEvent<HTMLDivElement>) {
     if (!dragging || pointerId.current !== event.pointerId) return;
-    setDragPx(event.clientX - dragStartX.current);
+    const width = event.currentTarget.clientWidth;
+    if (width <= 0) return;
+    setDragPercent(((event.clientX - dragStartX.current) / width) * 100);
   }
 
   function endDrag(event: ReactPointerEvent<HTMLDivElement>) {
     if (!dragging || pointerId.current !== event.pointerId) return;
-    const width = viewportRef.current?.clientWidth ?? 1;
+    const width = event.currentTarget.clientWidth || 1;
     const threshold = Math.min(80, width * 0.18);
     const delta = event.clientX - dragStartX.current;
 
@@ -331,7 +329,7 @@ function CarouselGallery({
     else setPage(dragStartPage.current);
 
     setDragging(false);
-    setDragPx(0);
+    setDragPercent(0);
     pointerId.current = null;
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
@@ -355,11 +353,8 @@ function CarouselGallery({
     }
   }
 
-  const width = viewportRef.current?.clientWidth ?? 0;
-  const dragPercent =
-    dragging && width > 0 ? (dragPx / width) * 100 : 0;
   const trackStyle = {
-    transform: `translate3d(calc(${-safePage * 100}% + ${dragPercent}%), 0, 0)`,
+    transform: `translate3d(calc(${-safePage * 100}% + ${dragging ? dragPercent : 0}%), 0, 0)`,
     transition: dragging ? "none" : undefined,
   } as const;
 
@@ -376,7 +371,6 @@ function CarouselGallery({
 
       <div className="editor-gallery-viewport-wrap">
         <div
-          ref={viewportRef}
           className={`editor-gallery-viewport${dragging ? " is-dragging" : ""}`}
           tabIndex={0}
           aria-live="polite"
@@ -455,6 +449,7 @@ function CarouselGallery({
             <button
               key={index}
               type="button"
+              role="tab"
               className={`editor-gallery-dot${index === safePage ? " is-active" : ""}`}
               aria-label={t("goToSlide", { n: index + 1 })}
               aria-selected={index === safePage}

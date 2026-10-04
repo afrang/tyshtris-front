@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useState, useSyncExternalStore } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { isAuthenticated } from "@/lib/auth/auth";
 import type { Language, SocialLink } from "@/lib/cms/types";
@@ -18,6 +18,11 @@ type Props = {
   accountLabel: string;
 };
 
+function subscribeAuth(onChange: () => void) {
+  window.addEventListener("storage", onChange);
+  return () => window.removeEventListener("storage", onChange);
+}
+
 export function OfficialBanner({
   officialText,
   howYouKnowLabel,
@@ -29,13 +34,14 @@ export function OfficialBanner({
   accountLabel,
 }: Props) {
   const [open, setOpen] = useState(false);
-  const [signedIn, setSignedIn] = useState(false);
   const panelId = useId();
   const pathname = usePathname();
-
-  useEffect(() => {
-    setSignedIn(isAuthenticated());
-  }, [pathname]);
+  // Pathname keeps this in sync after same-tab login/logout navigations.
+  const signedIn = useSyncExternalStore(
+    subscribeAuth,
+    () => (pathname, isAuthenticated()),
+    () => false,
+  );
 
   useEffect(() => {
     if (!open) return;

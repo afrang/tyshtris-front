@@ -27,7 +27,7 @@ export function LoginForm({ locale }: { locale: string }) {
 
   const dir: "ltr" | "rtl" = isRtlLocale(locale) ? "rtl" : "ltr";
 
-  const [mode, setMode] = useState<LoginMode>("password");
+  const [mode] = useState<LoginMode>("password");
   const [otpStep, setOtpStep] = useState<OtpStep>("request");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -53,19 +53,6 @@ export function LoginForm({ locale }: { locale: string }) {
   }, [resendCooldownSec]);
 
   const otpCode = useMemo(() => otpDigits.join(""), [otpDigits]);
-
-  function resetOtpState() {
-    setOtpDigits(["", "", "", "", "", ""]);
-    setOtpStep("request");
-    setError(null);
-  }
-
-  function handleModeChange(next: LoginMode) {
-    if (next === mode) return;
-    setMode(next);
-    resetOtpState();
-    setError(null);
-  }
 
   async function handlePasswordSubmit(e: React.FormEvent) {
     e.preventDefault();
