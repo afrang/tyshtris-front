@@ -16,6 +16,7 @@ import {
   parseGallerySettings,
   type ParsedGallerySettings,
 } from "@/lib/cms/gallerySettings";
+import { playbackKindFromUrl } from "@/lib/cms/mediaKind";
 
 type Props = {
   urls: string[];
@@ -28,6 +29,24 @@ function subscribeNoop() {
 }
 
 function GalleryImage({ url }: { url: string }) {
+  const kind = playbackKindFromUrl(url);
+
+  if (kind === "video") {
+    return (
+      <div className="editor-gallery-frame">
+        <video src={url} controls className="editor-gallery-image" />
+      </div>
+    );
+  }
+
+  if (kind === "audio") {
+    return (
+      <div className="editor-gallery-frame editor-gallery-frame--audio">
+        <audio src={url} controls className="editor-media-audio" />
+      </div>
+    );
+  }
+
   return (
     <div className="editor-gallery-frame">
       {/* CMS uploads may come from different API hosts/ports in local dev. */}
@@ -234,17 +253,23 @@ function GridGallery({
           gridTemplateColumns: `repeat(${settings.columns}, minmax(0, 1fr))`,
         }}
       >
-        {urls.map((url, index) => (
-          <button
-            key={url}
-            type="button"
-            className="editor-gallery-item"
-            aria-label={t("openImageFullscreen", { n: index + 1 })}
-            onClick={() => setLightboxIndex(index)}
-          >
-            <GalleryImage url={url} />
-          </button>
-        ))}
+        {urls.map((url, index) =>
+          playbackKindFromUrl(url) === "image" ? (
+            <button
+              key={url}
+              type="button"
+              className="editor-gallery-item"
+              aria-label={t("openImageFullscreen", { n: index + 1 })}
+              onClick={() => setLightboxIndex(index)}
+            >
+              <GalleryImage url={url} />
+            </button>
+          ) : (
+            <div key={url} className="min-w-0">
+              <GalleryImage url={url} />
+            </div>
+          ),
+        )}
       </div>
 
       {lightboxIndex !== null ? (
@@ -392,7 +417,9 @@ function CarouselGallery({
                 aria-hidden={pageIndex !== safePage}
               >
                 {chunk.map((url) => (
-                  <GalleryImage key={url} url={url} />
+                  <div key={url} className="min-w-0">
+                    <GalleryImage url={url} />
+                  </div>
                 ))}
               </div>
             ))}

@@ -629,6 +629,76 @@ body {
 }
 
 
+/* EditorTrya layout — 12-col on desktop, stacked on mobile (matches control-center) */
+.editor-content {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 1.25rem;
+  align-content: start;
+  align-items: start;
+}
+
+.editor-media-frame {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 0.45rem;
+  background: #111;
+}
+
+.editor-media-frame iframe,
+.editor-media-frame video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  object-fit: contain;
+  background: #111;
+}
+
+.editor-media-audio {
+  display: block;
+  width: 100%;
+}
+
+.editor-divider {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.editor-divider-line {
+  flex: 1;
+  min-width: 1rem;
+  border-top-style: solid;
+}
+
+.editor-divider-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.editor-content--stacked {
+  grid-template-columns: 1fr;
+}
+
+.editor-content--stacked > .editor-content-container {
+  grid-column: 1 / -1 !important;
+}
+
+@media (max-width: 767px) {
+  .editor-content:not(.editor-content--stacked) {
+    grid-template-columns: 1fr;
+  }
+
+  .editor-content:not(.editor-content--stacked) > .editor-content-container {
+    grid-column: 1 / -1 !important;
+  }
+}
+
 /* EditorTrya gallery — matches control-center preview (grid / carousel) */
 .editor-gallery {
   width: 100%;
@@ -659,6 +729,19 @@ body {
   overflow: hidden;
   background: #ececf3;
   border-radius: 0.45rem;
+}
+
+.editor-gallery-frame--audio {
+  display: flex;
+  align-items: center;
+  aspect-ratio: auto;
+  padding: 1rem 1.1rem;
+  background: #f4f4f8;
+}
+
+.editor-gallery-frame video.editor-gallery-image {
+  object-fit: contain;
+  background: #111;
 }
 
 .editor-gallery-image {

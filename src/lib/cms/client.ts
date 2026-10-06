@@ -152,7 +152,10 @@ function mapEditorContainer(raw: Record<string, unknown>): EditorContainer {
     id: String(raw.id ?? raw.Id ?? ""),
     parentId: (raw.parentId ?? raw.ParentId ?? null) as string | null,
     component: (raw.component ?? raw.Component ?? null) as string | null,
-    cols: (raw.cols ?? raw.Cols ?? null) as number | null,
+    cols: (() => {
+      const value = Number(raw.cols ?? raw.Cols);
+      return Number.isFinite(value) ? value : null;
+    })(),
     ordered: Number(raw.ordered ?? raw.Ordered ?? 0),
     publish: Boolean(raw.publish ?? raw.Publish ?? true),
     options: asRecord(raw.options ?? raw.Options),

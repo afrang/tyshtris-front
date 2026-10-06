@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 import { Link } from "@/i18n/navigation";
 import { EditorGallery } from "@/components/blog/EditorGallery";
+import { playbackKindFromUrl, youtubeEmbedUrl } from "@/lib/cms/mediaKind";
 import type { EditorComponent, EditorContainer, EditorTree } from "@/lib/cms/types";
 
 type Props = {
@@ -54,6 +55,56 @@ function TextBlock({ component }: { component: EditorComponent }) {
   );
 }
 
+function resolveMediaUrl(
+  mediaMap: Record<string, string>,
+  fileId: unknown,
+  componentId: string,
+): string | null {
+  if (typeof fileId === "string" && fileId && mediaMap[fileId]) {
+    return mediaMap[fileId];
+  }
+  return mediaMap[componentId] ?? null;
+}
+
+function imageStyles(options: Record<string, unknown>): {
+  wrap: CSSProperties;
+  image: CSSProperties;
+} {
+  const alignment =
+    options.alignment === "left" || options.alignment === "right"
+      ? options.alignment
+      : "center";
+  const fit = options.objectFit;
+  const objectFit =
+    fit === "contain" || fit === "fill" || fit === "none" || fit === "scale-down"
+      ? fit
+      : "cover";
+
+  return {
+    wrap: {
+      display: "flex",
+      justifyContent:
+        alignment === "center"
+          ? "center"
+          : alignment === "right"
+            ? "flex-end"
+            : "flex-start",
+      width: "100%",
+    },
+    image: {
+      width: typeof options.width === "string" && options.width ? options.width : "100%",
+      maxWidth:
+        typeof options.maxWidth === "string" && options.maxWidth
+          ? options.maxWidth
+          : "100%",
+      height: typeof options.height === "string" && options.height ? options.height : "auto",
+      objectFit,
+      borderRadius:
+        typeof options.borderRadius === "string" ? options.borderRadius : undefined,
+    },
+  };
+}
+
 function ImageBlock({
   component,
   mediaMap,
@@ -62,31 +113,71 @@ function ImageBlock({
   mediaMap: Record<string, string>;
 }) {
   const data = asRecord(component.data);
-  const fileId = typeof data.fileId === "string" ? data.fileId : null;
-  const src = fileId ? mediaMap[fileId] : null;
+  const src = resolveMediaUrl(mediaMap, data.fileId, component.id);
   if (!src) return null;
 
+  const styles = imageStyles(asRecord(component.options));
+  const image = (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt={String(data.alt ?? "")}
+      title={String(data.title ?? "")}
+      className="h-auto max-w-full"
+      style={styles.image}
+    />
+  );
+  const link = typeof data.link === "string" ? data.link.trim() : "";
+
   return (
-    <div className="overflow-hidden">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={src}
-        alt={String(data.alt ?? "")}
-        title={String(data.title ?? "")}
-        className="h-auto w-full"
-      />
+    <div className="overflow-hidden" style={styles.wrap}>
+      {link ? (
+        <a href={link} className="block max-w-full">
+          {image}
+        </a>
+      ) : (
+        image
+      )}
     </div>
   );
 }
 
 function ButtonBlock({ component }: { component: EditorComponent }) {
   const data = asRecord(component.data);
+  const options = asRecord(component.options);
+  const alignment =
+    options.alignment === "center" || options.alignment === "right"
+      ? options.alignment
+      : "left";
+  const size = options.size === "small" || options.size === "large" ? options.size : "medium";
+  const padding =
+    size === "small" ? "0.45rem 0.85rem" : size === "large" ? "0.85rem 1.45rem" : "0.65rem 1.1rem";
+  const fontSize = size === "small" ? "0.82rem" : size === "large" ? "1.05rem" : "0.92rem";
+
   return (
-    <div>
+    <div
+      style={{
+        display: "flex",
+        justifyContent:
+          alignment === "center" ? "center" : alignment === "right" ? "flex-end" : "flex-start",
+      }}
+    >
       <a
         href={String(data.url ?? "#")}
         target={String(data.target ?? "_self")}
-        className="inline-flex items-center justify-center bg-[var(--color-royal-purple)] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--color-royal-purple-deep)]"
+        className="inline-flex items-center justify-center font-semibold transition hover:brightness-95"
+        style={{
+          background:
+            typeof options.backgroundColor === "string"
+              ? options.backgroundColor
+              : "var(--color-royal-purple)",
+          color: typeof options.color === "string" ? options.color : "#ffffff",
+          borderRadius:
+            typeof options.borderRadius === "string" ? options.borderRadius : "6px",
+          boxShadow: typeof options.boxShadow === "string" ? options.boxShadow : undefined,
+          padding,
+          fontSize,
+        }}
       >
         {String(data.text ?? "Button")}
       </a>
@@ -128,6 +219,19 @@ function styleFromContainerOptions(
   return style;
 }
 
+function galleryUrls(
+  component: EditorComponent,
+  mediaMap: Record<string, string>,
+): string[] {
+  const data = asRecord(component.data);
+  return String(data.mediaRevision ?? "")
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean)
+    .map((id) => mediaMap[id])
+    .filter((url): url is string => Boolean(url));
+}
+
 function GalleryBlock({
   component,
   mediaMap,
@@ -135,24 +239,146 @@ function GalleryBlock({
   component: EditorComponent;
   mediaMap: Record<string, string>;
 }) {
-  const data = asRecord(component.data);
-  const revision = String(data.mediaRevision ?? "");
-  const urls = revision
-    .split(",")
-    .map((id) => id.trim())
-    .filter(Boolean)
-    .map((id) => mediaMap[id])
-    .filter((url): url is string => Boolean(url));
-
+  const urls = galleryUrls(component, mediaMap);
   if (urls.length === 0) return null;
 
   return (
     <EditorGallery
       urls={urls}
-      data={data}
+      data={asRecord(component.data)}
       options={asRecord(component.options)}
     />
   );
+}
+
+function VideoBlock({
+  component,
+  mediaMap,
+}: {
+  component: EditorComponent;
+  mediaMap: Record<string, string>;
+}) {
+  const data = asRecord(component.data);
+  const options = asRecord(component.options);
+  const aspectRatio =
+    typeof options.aspectRatio === "string" && options.aspectRatio
+      ? options.aspectRatio
+      : "16/9";
+  const title =
+    (typeof data.title === "string" && data.title) ||
+    (typeof data.fileName === "string" && data.fileName) ||
+    "Video";
+
+  if (data.sourceType !== "file") {
+    const embed = youtubeEmbedUrl(String(data.url ?? ""));
+    if (!embed) return null;
+    return (
+      <div className="editor-media-frame" style={{ aspectRatio }}>
+        <iframe
+          src={embed}
+          title={title}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      </div>
+    );
+  }
+
+  const src = resolveMediaUrl(mediaMap, data.fileId, component.id);
+  if (!src) return null;
+
+  const kind =
+    data.mediaKind === "audio" || data.mediaKind === "video"
+      ? data.mediaKind
+      : playbackKindFromUrl(src);
+
+  if (kind === "audio") {
+    return <audio className="editor-media-audio" controls src={src} title={title} />;
+  }
+
+  return (
+    <div className="editor-media-frame" style={{ aspectRatio }}>
+      <video controls src={src} title={title} />
+    </div>
+  );
+}
+
+function DividerBlock({ component }: { component: EditorComponent }) {
+  const options = asRecord(component.options);
+  const data = asRecord(component.data);
+  const lineStyle =
+    options.style === "dashed" || options.style === "dotted" ? options.style : "solid";
+  const color = typeof options.color === "string" ? options.color : "#d5d7e2";
+  const thickness = typeof options.thickness === "string" ? options.thickness : "1px";
+  const width = typeof options.width === "string" ? options.width : "100%";
+  const label = String(options.text || data.text || "").trim();
+  const line = {
+    borderTopStyle: lineStyle,
+    borderTopWidth: thickness,
+    borderTopColor: color,
+  } as const;
+
+  if (options.contentMode === "text" && label) {
+    return (
+      <div
+        className="editor-divider"
+        style={{
+          gap: typeof options.gap === "string" ? options.gap : "12px",
+          width,
+        }}
+      >
+        <span className="editor-divider-line" style={line} />
+        <span
+          className="editor-divider-label"
+          style={{
+            color: typeof options.contentColor === "string" ? options.contentColor : "#6f7280",
+          }}
+        >
+          {label}
+        </span>
+        <span className="editor-divider-line" style={line} />
+      </div>
+    );
+  }
+
+  return <hr style={{ border: 0, width, margin: 0, ...line }} />;
+}
+
+function htmlHasText(html: string): boolean {
+  return html.replace(/<[^>]*>/g, "").replace(/&nbsp;/gi, " ").trim().length > 0;
+}
+
+function componentIsVisible(
+  component: EditorComponent,
+  mediaMap: Record<string, string>,
+): boolean {
+  if (!component.publish) return false;
+  const data = asRecord(component.data);
+
+  switch (component.type) {
+    case "title":
+    case "quote":
+      return String(data.text ?? "").trim().length > 0;
+    case "text":
+    case "html":
+      return htmlHasText(String(data.html ?? ""));
+    case "image":
+      return Boolean(resolveMediaUrl(mediaMap, data.fileId, component.id));
+    case "gallery":
+      return galleryUrls(component, mediaMap).length > 0;
+    case "video":
+      if (data.sourceType === "file") {
+        return Boolean(resolveMediaUrl(mediaMap, data.fileId, component.id));
+      }
+      return Boolean(youtubeEmbedUrl(String(data.url ?? "")));
+    case "button":
+      return String(data.text ?? "").trim().length > 0;
+    case "spacer":
+    case "divider":
+      return true;
+    default:
+      return false;
+  }
 }
 
 function SpacerBlock({ component }: { component: EditorComponent }) {
@@ -185,50 +411,90 @@ function ComponentBlock({
       return <QuoteBlock component={component} />;
     case "gallery":
       return <GalleryBlock component={component} mediaMap={mediaMap} />;
+    case "video":
+      return <VideoBlock component={component} mediaMap={mediaMap} />;
     case "spacer":
       return <SpacerBlock component={component} />;
     case "divider":
-      return <hr className="border-zinc-200" />;
+      return <DividerBlock component={component} />;
     default:
       return null;
   }
 }
 
-function containerColClass(cols: number, stacked: boolean): string {
-  if (stacked) return "col-span-full";
-  if (cols === 4) return "md:col-span-4";
-  if (cols === 6) return "md:col-span-6";
-  return "md:col-span-12";
+function normalizeCols(cols: number | null | undefined): number {
+  const value = Number(cols);
+  if (value === 4 || value === 6 || value === 12) return value;
+  return 12;
+}
+
+function placeContainers(
+  containers: EditorContainer[],
+  mediaMap: Record<string, string>,
+  stacked: boolean,
+): Array<{ container: EditorContainer; span: number }> {
+  const visible = containers
+    .filter((container) => container.publish)
+    .filter((container) =>
+      container.components.some((component) => componentIsVisible(component, mediaMap)),
+    )
+    .map((container) => ({
+      container,
+      span: stacked ? 12 : normalizeCols(container.cols),
+    }));
+
+  if (stacked) return visible;
+
+  const placed: Array<{ container: EditorContainer; span: number }> = [];
+  let rowSum = 0;
+
+  for (const item of visible) {
+    const span = Math.min(12, item.span);
+    if (rowSum > 0 && rowSum + span > 12) {
+      placed[placed.length - 1].span += 12 - rowSum;
+      rowSum = 0;
+    }
+    placed.push({ container: item.container, span });
+    rowSum += span;
+    if (rowSum >= 12) rowSum = 0;
+  }
+
+  if (rowSum > 0 && rowSum < 12 && placed.length > 0) {
+    placed[placed.length - 1].span += 12 - rowSum;
+  }
+
+  return placed;
 }
 
 function ContainerBlock({
   container,
   mediaMap,
-  stacked = false,
+  span,
 }: {
   container: EditorContainer;
   mediaMap: Record<string, string>;
-  stacked?: boolean;
+  span: number;
 }) {
-  if (!container.publish) return null;
-  const cols =
-    container.cols === 4 || container.cols === 6 || container.cols === 12
-      ? container.cols
-      : 12;
+  const components = container.components
+    .slice()
+    .sort((a, b) => a.ordered - b.ordered)
+    .filter((component) => componentIsVisible(component, mediaMap));
+
+  if (components.length === 0) return null;
 
   return (
     <section
-      className={`flex min-w-0 flex-col gap-3 ${containerColClass(cols, stacked)}`}
-      style={styleFromContainerOptions(container.options)}
+      className="editor-content-container flex min-w-0 flex-col gap-3"
+      style={{
+        gridColumn: `span ${span}`,
+        ...styleFromContainerOptions(container.options),
+      }}
     >
-      {container.components
-        .slice()
-        .sort((a, b) => a.ordered - b.ordered)
-        .map((component) => (
-          <div key={component.id}>
-            <ComponentBlock component={component} mediaMap={mediaMap} />
-          </div>
-        ))}
+      {components.map((component) => (
+        <div key={component.id}>
+          <ComponentBlock component={component} mediaMap={mediaMap} />
+        </div>
+      ))}
     </section>
   );
 }
@@ -236,26 +502,29 @@ function ContainerBlock({
 export function EditorContent({ tree, mediaMap, stacked = false }: Props) {
   if (!tree.publish) return null;
 
+  const placed = placeContainers(
+    tree.containers.slice().sort((a, b) => a.ordered - b.ordered),
+    mediaMap,
+    stacked,
+  );
+
   return (
     <div
       className={
         stacked
-          ? "grid grid-cols-1 gap-5"
-          : "grid grid-cols-1 gap-5 md:grid-cols-12"
+          ? "editor-content editor-content--stacked"
+          : "editor-content"
       }
       translate="no"
     >
-      {tree.containers
-        .slice()
-        .sort((a, b) => a.ordered - b.ordered)
-        .map((container) => (
-          <ContainerBlock
-            key={container.id}
-            container={container}
-            mediaMap={mediaMap}
-            stacked={stacked}
-          />
-        ))}
+      {placed.map(({ container, span }) => (
+        <ContainerBlock
+          key={container.id}
+          container={container}
+          mediaMap={mediaMap}
+          span={span}
+        />
+      ))}
     </div>
   );
 }
