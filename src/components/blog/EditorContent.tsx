@@ -194,6 +194,13 @@ function ComponentBlock({
   }
 }
 
+function containerColClass(cols: number, stacked: boolean): string {
+  if (stacked) return "col-span-full";
+  if (cols === 4) return "md:col-span-4";
+  if (cols === 6) return "md:col-span-6";
+  return "md:col-span-12";
+}
+
 function ContainerBlock({
   container,
   mediaMap,
@@ -204,19 +211,15 @@ function ContainerBlock({
   stacked?: boolean;
 }) {
   if (!container.publish) return null;
-  const cols = stacked
-    ? 12
-    : container.cols === 4 || container.cols === 6 || container.cols === 12
+  const cols =
+    container.cols === 4 || container.cols === 6 || container.cols === 12
       ? container.cols
       : 12;
 
   return (
     <section
-      className="flex min-w-0 flex-col gap-3"
-      style={{
-        gridColumn: `span ${cols}`,
-        ...styleFromContainerOptions(container.options),
-      }}
+      className={`flex min-w-0 flex-col gap-3 ${containerColClass(cols, stacked)}`}
+      style={styleFromContainerOptions(container.options)}
     >
       {container.components
         .slice()
@@ -234,7 +237,14 @@ export function EditorContent({ tree, mediaMap, stacked = false }: Props) {
   if (!tree.publish) return null;
 
   return (
-    <div className="grid grid-cols-12 gap-5" translate="no">
+    <div
+      className={
+        stacked
+          ? "grid grid-cols-1 gap-5"
+          : "grid grid-cols-1 gap-5 md:grid-cols-12"
+      }
+      translate="no"
+    >
       {tree.containers
         .slice()
         .sort((a, b) => a.ordered - b.ordered)

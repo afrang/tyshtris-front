@@ -132,16 +132,12 @@ export default async function BlogPostPage({ params }: Props) {
         </div>
       </header>
 
-      {/* In front of the hero wave; CMS columns stack full-width. */}
+      {/* In front of the hero wave; CMS columns stack on mobile, grid from md up. */}
       <div className="relative z-30 -mt-8 w-full flex-1 px-4 pb-8 pt-6 sm:-mt-10 sm:px-6 sm:pt-8 lg:-mt-12 lg:px-8">
         <div className="mx-auto w-full max-w-7xl">
         {post.content ? (
           <section className="mb-14">
-            <EditorContent
-              tree={post.content}
-              mediaMap={post.mediaMap}
-              stacked
-            />
+            <EditorContent tree={post.content} mediaMap={post.mediaMap} />
           </section>
         ) : (
           <p className="mb-14 text-zinc-600">{t("emptyContent")}</p>
